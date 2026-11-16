@@ -65,7 +65,7 @@ SingleTag :: union {
 }
 
 Nbt :: struct {
-	name:     string,
+	name: string,
 	root: TagCompound,
 }
 
@@ -270,7 +270,9 @@ _read_list :: proc(reader: ^bytes.Reader) -> TagList {
 
 	switch tag_type {
 	case .End:
-		fmt.eprintln("Got TagEnd as element type of TagList")
+		if list_length != 0 {
+			fmt.eprintln("Got TagEnd as element type of TagList while the length is", list_length)
+		}
 		return {}
 
 	case .Byte:
@@ -337,8 +339,11 @@ _read_list :: proc(reader: ^bytes.Reader) -> TagList {
 		return array
 
 	case .Compound:
-		// TODO: Implement
-		return {}
+		array := make([]TagCompound, list_length)
+		for i in 0 ..< list_length {
+			array[i] = _read_compound(reader)
+		}
+		return array
 
 	case .IntArray:
 		array := make([]TagIntArray, list_length)
